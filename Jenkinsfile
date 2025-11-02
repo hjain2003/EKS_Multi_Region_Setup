@@ -7,7 +7,7 @@ pipeline {
         IMAGE_WEST       = 'west-post'
         ECR_REPO_EAST    = "${AWS_ACCOUNT_ID}.dkr.ecr.ap-south-1.amazonaws.com/${IMAGE_EAST}"
         ECR_REPO_WEST    = "${AWS_ACCOUNT_ID}.dkr.ecr.us-west-1.amazonaws.com/${IMAGE_WEST}"
-        PRIMARY_REGION   = 'ap-south-1'
+        PRIMARY_REGION   = 'us-east-1'
         SECONDARY_REGION = 'us-west-1'
         K8S_DIR          = 'k8s'
     }
@@ -16,7 +16,7 @@ pipeline {
 
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/hjain2003/EKS_Multi_Region_Setup'
+                git branch: 'master', url: 'https://github.com/hjain2003/EKS_Multi_Region_Setup'
             }
         }
 
