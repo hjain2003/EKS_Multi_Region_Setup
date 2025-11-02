@@ -1,0 +1,82 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_REGION = "us-west-1"
+        ECR_REPO = "post-service-repo" 
+        ECS_CLUSTER = "ecs-cluster"
+        ECS_SERVICE = "ECS-post-service"
+        TASK_DEFINITION_FAMILY = "post-service-task"
+        AWS_ACCOUNT_ID = "302263069749"
+        IMAGE_TAG = "latest"
+        IMAGE_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}"
+    }
+
+    triggers {
+        // Optional: only trigger if changes in frontend/
+        pollSCM('* * * * *') // check every minute
+    }
+
+    options {
+        skipDefaultCheckout true
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout([$class: 'GitSCM',
+                          branches: [[name: '*/main']],
+                          userRemoteConfigs: [[url: 'https://github.com/hjain2003/openforum-microservices.git']]]
+                )
+            }
+        }
+
+        stage('Build Docker Image') {
+            when { changeset "post-service/**" }
+            steps {
+                script {
+                    sh '''
+                        cd post-service
+                        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+                        docker build -t $IMAGE_URI .
+                        docker push $IMAGE_URI
+                    '''
+                }
+            }
+        }
+
+        stage('Register New Task Definition') {
+            when { changeset "post-service/**" }
+            steps {
+                script {
+                    sh '''
+                        # Fetch current task def JSON
+                        aws ecs describe-task-definition --task-definition $TASK_DEFINITION_FAMILY --region $AWS_REGION \
+                            --query "taskDefinition" > /tmp/td.json
+
+                        # Clean up unwanted fields
+                        cat /tmp/td.json | jq 'del(.taskDefinitionArn,.revision,.status,.requiresAttributes,.compatibilities,.registeredAt,.registeredBy)' > /tmp/new-td.json
+
+                        # Update container image
+                        jq --arg IMAGE_URI "$IMAGE_URI" '.containerDefinitions[0].image = $IMAGE_URI' /tmp/new-td.json > /tmp/final-td.json
+
+                        # Register new task def revision
+                        NEW_TD_ARN=$(aws ecs register-task-definition --cli-input-json file:///tmp/final-td.json --region $AWS_REGION --query "taskDefinition.taskDefinitionArn" --output text)
+
+                        # Update ECS service to new revision
+                        aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --task-definition $NEW_TD_ARN --region $AWS_REGION
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Post-service deployed successfully!"
+        }
+        failure {
+            echo "❌ Post-service pipeline failed!"
+        }
+    }
+}
