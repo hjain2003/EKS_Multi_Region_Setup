@@ -10,6 +10,7 @@ pipeline {
         PRIMARY_REGION   = 'us-east-1'
         SECONDARY_REGION = 'us-west-1'
         K8S_DIR          = 'k8s'
+	INFRA_DIR        = 'infra'
     }
 
     stages {
@@ -24,6 +25,19 @@ pipeline {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
                     sh "aws sts get-caller-identity"
+                }
+            }
+        }
+	
+	stage('Provision Multi-Region Infra') {
+            steps {
+                dir("${INFRA_DIR}") {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+                        sh """
+                        terraform init -input=false
+                        terraform apply -auto-approve
+                        """
+                    }
                 }
             }
         }
