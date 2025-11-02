@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: post-deployment
+  labels:
+    app: comment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: post
+  template:
+    metadata:
+      labels:
+        app: post
+    spec:
+      containers:
+      - name: post
+        image: 302263069749.dkr.ecr.us-east-1.amazonaws.com/east-post:latest
+        ports:
+        - containerPort: 5001
+        env:
+        - name: PORT
+          value: "5001"
+        - name: MONGO_URI
+          value: "mongodb+srv://harshjainn2003:harshjainisbest@cluster0.zvmr1nf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: post-service
+spec:
+  type: ClusterIP
+  selector:
+    app: post
+  ports:
+    - port: 5001
+      targetPort: 5001

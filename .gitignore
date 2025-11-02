@@ -1,0 +1,33 @@
+# Terraform stuff
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*.override.tf
+*.override.tf.json
+.terraform/
+.terraform.lock.hcl
+
+# Sensitive local vars
+terraform.tfvars
+*.auto.tfvars
+*.secret.tfvars
+*.pem
+*.key
+*.crt
+
+# OS garbage
+.DS_Store
+Thumbs.db
+
+# Editor junk
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs and outputs
+*.log
+*.out
