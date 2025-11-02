@@ -31,7 +31,7 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 sh """
-                docker build -t ${IMAGE_EAST}:latest .
+                docker build -t ${IMAGE_EAST}:latest post-service/
                 docker tag ${IMAGE_EAST}:latest ${IMAGE_WEST}:latest
                 """
             }
