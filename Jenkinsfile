@@ -29,18 +29,18 @@ pipeline {
             }
         }
 	
-	stage('Provision Multi-Region Infra') {
-            steps {
-                dir("${INFRA_DIR}") {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-                        sh """
-                        terraform init -input=false
-                        terraform apply -auto-approve
-                        """
-                    }
-                }
-            }
-        }
+	// stage('Provision Multi-Region Infra') {
+ //            steps {
+ //                dir("${INFRA_DIR}") {
+ //                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+ //                        sh """
+ //                        terraform init -input=false
+ //                        terraform apply -auto-approve
+ //                        """
+ //                    }
+ //                }
+ //            }
+ //        }
 
         stage('Build Docker Images') {
             steps {
