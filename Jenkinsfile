@@ -5,7 +5,7 @@ pipeline {
         AWS_ACCOUNT_ID   = '302263069749'
         IMAGE_EAST       = 'east-post'
         IMAGE_WEST       = 'west-post'
-        ECR_REPO_EAST    = "${AWS_ACCOUNT_ID}.dkr.ecr.ap-south-1.amazonaws.com/${IMAGE_EAST}"
+        ECR_REPO_EAST    = "${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${IMAGE_EAST}"
         ECR_REPO_WEST    = "${AWS_ACCOUNT_ID}.dkr.ecr.us-west-1.amazonaws.com/${IMAGE_WEST}"
         PRIMARY_REGION   = 'us-east-1'
         SECONDARY_REGION = 'us-west-1'
