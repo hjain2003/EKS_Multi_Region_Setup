@@ -46,7 +46,7 @@ pipeline {
                 scannerHome = tool 'SonarScanner'
             }
             steps {
-                withSonarQubeEnv('SonarQubeServer') {
+                withSonarQubeEnv('my-sonar-qube-server') {
                     sh '''
                     ${scannerHome}/bin/sonar-scanner \
                       -Dsonar.projectKey=EKS_Multi_Region_Setup \
