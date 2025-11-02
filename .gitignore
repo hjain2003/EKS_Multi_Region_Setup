@@ -11,9 +11,6 @@ override.tf.json
 .terraform.lock.hcl
 
 # Sensitive local vars
-terraform.tfvars
-*.auto.tfvars
-*.secret.tfvars
 *.pem
 *.key
 *.crt
@@ -186,11 +183,6 @@ comment=service/node_modules/
 infra/.terraform/
 infra/**/*.tfstate
 infra/**/*.tfstate.*
-infra/terraform.tfvars
-infra/ecs-cluster/terraform.tfvars
-infra/alb/terraform.tfvars
-infra/alb-routing/terraform.tfvars
-infra/ecr-repos/terraform.tfvars
 
 # MacOS
 .DS_Store
