@@ -65,7 +65,7 @@ pipeline {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
                     sh """
-                    aws eks update-kubeconfig --region ${PRIMARY_REGION} --name mern-eks-cluster-east
+                    aws eks update-kubeconfig --region ${PRIMARY_REGION} --name multi-region-eks-demo-eks
                     kubectl apply -f ${K8S_DIR}/
                     """
                 }
@@ -82,7 +82,7 @@ pipeline {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
                     sh """
-                    aws eks update-kubeconfig --region ${SECONDARY_REGION} --name mern-eks-cluster-west
+                    aws eks update-kubeconfig --region ${SECONDARY_REGION} --name multi-region-eks-demo-eks
                     kubectl apply -f ${K8S_DIR}/
                     """
                 }
