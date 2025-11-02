@@ -2,44 +2,44 @@ pipeline {
     agent any
 
     environment {
-        AWS_ACCOUNT_ID        = '302263069749'                // your AWS account
-        IMAGE_EAST            = 'east-post'
-        IMAGE_WEST            = 'west-post'
-        ECR_REPO_EAST         = "${AWS_ACCOUNT_ID}.dkr.ecr.ap-south-1.amazonaws.com/${IMAGE_EAST}"
-        ECR_REPO_WEST         = "${AWS_ACCOUNT_ID}.dkr.ecr.us-west-1.amazonaws.com/${IMAGE_WEST}"
-        PRIMARY_REGION        = 'ap-south-1'
-        SECONDARY_REGION      = 'us-west-1'
-        K8S_DIR               = 'k8s'                         // path to your manifests
+        AWS_ACCOUNT_ID   = '302263069749'
+        IMAGE_EAST       = 'east-post'
+        IMAGE_WEST       = 'west-post'
+        ECR_REPO_EAST    = "${AWS_ACCOUNT_ID}.dkr.ecr.ap-south-1.amazonaws.com/${IMAGE_EAST}"
+        ECR_REPO_WEST    = "${AWS_ACCOUNT_ID}.dkr.ecr.us-west-1.amazonaws.com/${IMAGE_WEST}"
+        PRIMARY_REGION   = 'ap-south-1'
+        SECONDARY_REGION = 'us-west-1'
+        K8S_DIR          = 'k8s'
     }
 
     stages {
 
         stage('Checkout Code') {
             steps {
-                git branch: 'master', url: 'https://github.com/hjain2003/EKS_Multi_Region_Setup'
+                git branch: 'main', url: 'https://github.com/hjain2003/EKS_Multi_Region_Setup'
             }
         }
 
-        stage('Login to AWS') {
+        stage('AWS Login and Verify') {
             steps {
-                sh "aws sts get-caller-identity"
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: '6bfe2ab5-fc0c-421c-a3ec-cb11b02903aa']]) {
+                    sh "aws sts get-caller-identity"
+                }
             }
         }
 
         stage('Build Docker Images') {
             steps {
-                script {
-                    sh """
-                    docker build -t ${IMAGE_EAST}:latest .
-                    docker tag ${IMAGE_EAST}:latest ${IMAGE_WEST}:latest
-                    """
-                }
+                sh """
+                docker build -t ${IMAGE_EAST}:latest .
+                docker tag ${IMAGE_EAST}:latest ${IMAGE_WEST}:latest
+                """
             }
         }
 
         stage('Push to ECR - Primary (East)') {
             steps {
-                script {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
                     sh """
                     aws ecr get-login-password --region ${PRIMARY_REGION} | docker login --username AWS --password-stdin ${ECR_REPO_EAST}
                     docker tag ${IMAGE_EAST}:latest ${ECR_REPO_EAST}:latest
@@ -51,7 +51,7 @@ pipeline {
 
         stage('Push to ECR - Secondary (West)') {
             steps {
-                script {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
                     sh """
                     aws ecr get-login-password --region ${SECONDARY_REGION} | docker login --username AWS --password-stdin ${ECR_REPO_WEST}
                     docker tag ${IMAGE_WEST}:latest ${ECR_REPO_WEST}:latest
@@ -63,7 +63,7 @@ pipeline {
 
         stage('Deploy to EKS - Primary (East)') {
             steps {
-                script {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
                     sh """
                     aws eks update-kubeconfig --region ${PRIMARY_REGION} --name mern-eks-cluster-east
                     kubectl apply -f ${K8S_DIR}/
@@ -80,7 +80,7 @@ pipeline {
 
         stage('Deploy to EKS - Secondary (West)') {
             steps {
-                script {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
                     sh """
                     aws eks update-kubeconfig --region ${SECONDARY_REGION} --name mern-eks-cluster-west
                     kubectl apply -f ${K8S_DIR}/
