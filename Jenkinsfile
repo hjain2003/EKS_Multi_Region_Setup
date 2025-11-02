@@ -16,7 +16,7 @@ pipeline {
 
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/hjain2003/EKS_Multi_Region_Setup'
+                git branch: 'master', url: 'https://github.com/hjain2003/EKS_Multi_Region_Setup'
             }
         }
 
