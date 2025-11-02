@@ -10,7 +10,7 @@ pipeline {
         PRIMARY_REGION   = 'us-east-1'
         SECONDARY_REGION = 'us-west-1'
         K8S_DIR          = 'k8s'
-	INFRA_DIR        = 'infra'
+	INFRA_DIR        = 'infra/envs/dev'
     }
 
     stages {
