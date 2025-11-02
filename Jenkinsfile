@@ -41,7 +41,23 @@ pipeline {
  //                }
  //            }
  //        }
-
+		stage('SonarQube Analysis') {
+            environment {
+                scannerHome = tool 'SonarScanner'
+            }
+            steps {
+                withSonarQubeEnv('SonarQubeServer') {
+                    sh '''
+                    ${scannerHome}/bin/sonar-scanner \
+                      -Dsonar.projectKey=EKS_Multi_Region_Setup \
+                      -Dsonar.sources=. \
+                      -Dsonar.host.url=$SONAR_HOST_URL \
+                      -Dsonar.login=$SONAR_AUTH_TOKEN
+                    '''
+                }
+            }
+        }
+		
         stage('Build Docker Images') {
             steps {
                 sh """
