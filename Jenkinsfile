@@ -20,6 +20,23 @@ pipeline {
             }
         }
 
+        stage('SonarQube Analysis') {
+            environment {
+                scannerHome = tool 'SonarScanner'
+            }
+            steps {
+                withSonarQubeEnv('SonarQubeServer') {
+                    sh '''
+                    ${scannerHome}/bin/sonar-scanner \
+                      -Dsonar.projectKey=EKS_Multi_Region_Setup \
+                      -Dsonar.sources=. \
+                      -Dsonar.host.url=$SONAR_HOST_URL \
+                      -Dsonar.login=$SONAR_AUTH_TOKEN
+                    '''
+                }
+            }
+        }
+
         stage('AWS Login and Verify') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: '6bfe2ab5-fc0c-421c-a3ec-cb11b02903aa']]) {
